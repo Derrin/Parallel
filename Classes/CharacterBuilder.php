@@ -9,7 +9,9 @@ include_once('RaidProgression.php');
 include_once('BossKills.php');
 include_once('Items\Item.php');
 include_once('Items\GearItem.php');
+include_once('Items\NullGearItem.php');
 include_once('Items\Head.php');
+
 
 class CharacterBuilder {
     public function buildCharacter($json){
@@ -149,11 +151,14 @@ class CharacterBuilder {
         return $professions;
     }
     private function buildItems($json){
-        $items = array();
+        
         //headpiece
         //__construct($id, $name, $icon, $quality, $itemlevel, $upgrade, $maxupgrade, $gems, $reforge, $set, $suffix) {
-        
         //check for null values
+		
+		/*
+		// DDD: I refactored this section somewhat, to allow for flexibility and easier looping.
+		$items = array();
         $items['head'] = new Head(
                 $json->head->id,
                 $json->head->name,
@@ -164,29 +169,134 @@ class CharacterBuilder {
                 $json->head->tooltipParams->upgrade->total,
                 array(0 => $json->head->tooltipParams->gem0,
                       1 => $json->head->tooltipParams->gem1),
-                /*$json->head->tooltipParams->reforge*/0,
-                /*$json->head->tooltipParams->set,*/array(),
-                /*$json->head->tooltipParams->suffix*/0,
-                /*$json->head->tooltipParams->transmogItem*/0);
-        return $items;
-        //neck
-        //shoulder
-        //back
-        //chest
-        //shirt
-        //tabard
-        //wrist
-        //hands
-        //waist
-        //legs
-        //feet
-        //finger1
-        //finger2
-        //trinket1
-        //trinket2
-        //mainhand
-        //offhand     
+                $json->head->tooltipParams->reforge,
+                $json->head->tooltipParams->set,
+                $json->head->tooltipParams->suffix,
+                $json->head->tooltipParams->transmogItem
+		);
+		*/
+		
+		$items = array();
+		$itemTypes = array("head","neck","shoulder","back","chest","shirt","tabard","wrist","hands","waist","legs","feet","finger1","finger2","trinket1","trinket2","mainhand","offhand");
+		foreach($itemTypes as $key => $value) $items[$value] = new NullGearItem(); // Creates empty obj to allow method calls to missing items.
+		
+		// Generic looping of 'items' json obj
+		foreach(get_object_vars($json) as $itemType => $itemObj){
+			if(is_object($itemObj)){ // Check that its an object, as some attributes in the 'items' json obj are values and not actual item sub-objects. for example "avarageItemLevel"
+				$itemType = strtolower($itemType); // Issues with: "mainHand" and "offHand", as lowercase-version strings are used elsewhere in code.
+				$items[$itemType] = $this->buildItemObject($itemObj,$itemType);
+			}
+		}
+		
+		return $items;
     }
+	
+	/**
+	 * This method splits the a gear item's JSON into its parts and builds the relevant GearItem class from the parts. Also does the checking for empty values.
+	 * @author DDD
+	 * @param jsonGearItem - An obj from the character's items
+	 * @param itemType - A string value of item type, for example "head" or "neck".
+	 * @return GearItem
+	 **/
+	private function buildItemObject($jsonGearItem,$itemType){
+		$gems = array();
+		$setPieces = null;
+		$reforge = null;
+		$transmogItem = null;
+		$upgradesCurrent = null;
+		$upgradesTotal = null;
+		$randomEnch = null;
+		$enchant = null;
+		
+		foreach(get_object_vars($jsonGearItem->tooltipParams) as $ttName => $ttValue){
+			switch($ttName){
+				case "gem0":
+				case "gem1":
+				case "gem2":
+				case "gem3":
+				case "gem4":
+					$gems[] = $ttValue;
+					break;
+				case "set":
+					$setPieces = $ttValue;
+					break;
+				case "reforge":
+					$reforge = $ttValue;
+					break;
+				case "transmogItem":
+					$transmogItem = $ttValue;
+					break;
+				case "upgrade":
+					$upgradesCurrent = $ttValue->current;
+					$upgradesTotal = $ttValue->total;
+					break;
+				case "suffix":
+					$randomEnch = $ttValue;
+					break;
+				case "enchant":
+					$enchant = $ttValue;
+					break;
+			}
+		}
+		
+		// TODO - DDD: there must be a better way of doing this, instead of a stupidly large switch of each item type...
+		switch($itemType){
+			case "head":
+				$newObj = new Head(
+						$jsonGearItem->id,
+						$jsonGearItem->name,
+						$jsonGearItem->icon,
+						$jsonGearItem->quality,
+						$jsonGearItem->itemLevel,
+						$upgradesCurrent,
+						$upgradesTotal,
+						$gems,
+						$reforge,
+						$setPieces,
+						$randomEnch,
+						$enchant,
+						$transmogItem
+				);
+				break;
+			// TODO - need to handle each specific item type.
+			case "neck":
+			case "shoulder":
+			case "back":
+			case "chest":
+			case "shirt":
+			case "tabard":
+			case "wrist":
+			case "hands":
+			case "waist":
+			case "legs":
+			case "feet":
+			case "finger1":
+			case "finger2":
+			case "trinket1":
+			case "trinket2":
+			case "mainhand":
+			case "offhand":
+			default: 
+				$newObj = new GearItem(
+						$jsonGearItem->id,
+						$jsonGearItem->name,
+						$jsonGearItem->icon,
+						$jsonGearItem->quality,
+						$jsonGearItem->itemLevel,
+						$upgradesCurrent,
+						$upgradesTotal,
+						$gems,
+						$reforge,
+						$setPieces,
+						$randomEnch,
+						$enchant
+				);
+				break;
+		}
+		return $newObj;
+	}
+	
+	
     private function buildProgress($json){
         $progress = array();
         $raid = array(0 => 6738,//SoO
