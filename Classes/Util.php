@@ -1,4 +1,5 @@
 <?php
+if (!defined('DS')) define("DS",DIRECTORY_SEPARATOR);
 
 class Util {
     public static function getIcon18($item){

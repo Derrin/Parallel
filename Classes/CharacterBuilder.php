@@ -1,5 +1,5 @@
 <?php
-include_once('/Util.php'); //nog te wijzigen
+include_once('/Util.php');
 include_once('Character.php');
 include_once('Spec.php');
 include_once('Talent.php');
@@ -7,12 +7,18 @@ include_once('Glyph.php');
 include_once('Profession.php');
 include_once('RaidProgression.php');
 include_once('BossKills.php');
-include_once('Items\Item.php');
-include_once('Items\GearItem.php');
-include_once('Items\NullGearItem.php');
-include_once('Items\Head.php');
 
+// Auto-Loads Item Classes when needed.
+function __autoload($className){
+    $sFileName = 'Classes' . DS . 'Items' . DS . $className . '.php';
+    if (file_exists($sFileName) && !class_exists($className)) include_once $sFileName;
+	else throw new Exception("Unable to load $className.");
+}
 
+/**
+ * Factory class that builds the a Character objects from the JSON character obj.
+ * Additionally processing other character data from other character-related JSON objects.
+ */
 class CharacterBuilder {
     public function buildCharacter($json){
         //build character
