@@ -16,6 +16,7 @@
     //echo '<a href="http://www.wowhead.com/item=94820" class="q4" rel="rand=-339">abc</a>';
     error_reporting(E_ALL);
     include_once('Classes\CharacterBuilder.php');
+	include_once('Classes\JsonConnector.php');
 
     //ini_set('max_execution_time', 300);
     //http://eu.battle.net/api/wow/character/Silvermoon/Derrin?fields=items,feed,stats,talents,professions,titles,progression
@@ -30,14 +31,12 @@
     $server = "Silvermoon";
 
     //guild parameter only for pugs and recruits, not for guildaudits
-    $json = @file_get_contents("http://" . $region . ".battle.net/api/wow/character/" . $server . "/" . $char . "?fields=talents,stats,guild,items,progression,professions,titles");
-
-    //check if $json returned a JSON string or a false boolean
-    if ($json === false) {
-        echo '<h1>Char not found, good day sir!</h1>';
-        // to logfile character that couldn't be found!
-        // server may be down too!
-    } else {
+	$characterURL = "http://" . $region . ".battle.net/api/wow/character/" . $server . "/" . $char . "?fields=talents,stats,guild,items,progression,professions,titles";
+	try {
+		$jsonConn = new JsonConnector();
+		$json = $jsonConn->request($characterURL);
+	
+	
         //decode the json and put the results in $results
         $results = json_decode($json);
         //check if there is data in the $results object
@@ -213,7 +212,9 @@
             var_dump($results->items);
             var_dump($results);
         }
-    }
+    } catch(Exception $ex){
+		echo "<span style='color:red;'>" . $ex->getMessage() . "</span>";
+	}
 ?>
     </body>
 </html>

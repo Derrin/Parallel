@@ -24,11 +24,11 @@ class JsonConnector {
 	 */
 	public function __construct() {
 		try {
-			$this->conn = mysqli_connect($this->host,$this->username,$this->password,$this->database);
-			// Check connection
-			if (mysqli_connect_errno()){
-				throw new Exception("Failed to connect to MySQL: " . mysqli_connect_error());
+			$this->conn = new mysqli($this->host,$this->username,$this->password,$this->database);
+			if ($this->conn->connect_errno){
+				throw new Exception("Failed to connect to MySQL: " . $this->conn->connect_error);
 			}
+			$this->update();
 		} catch(Exception $ex){
 			throw $ex;
 		}
@@ -39,16 +39,19 @@ class JsonConnector {
 	 * @param url Is the full URL that you wish to retrieve.
 	 */
 	public function request($url){
-		$result = mysqli_query($this->conn,"SELECT * FROM jsoncache WHERE url='" . $url . "';");
-        $rowcount = mysqli_num_rows($result);
-        if($rowcount==1){
-			while($row = mysqli_fetch_array($result)){
-				if($this->isFresh($row['date_saved'],$row['time_to_live'])){
-					return $row['json'];
+		$rowcount = 0;
+		if($result = $this->conn->query("SELECT * FROM jsoncache WHERE url='" . $url . "';")){
+			$rowcount = $result->num_rows;
+			if($rowcount==1){
+				while ($row = $result->fetch_assoc()) {
+					if($this->isFresh($row['date_saved'],$row['time_to_live'])){
+						return $row['json'];
+					}
+					// else: needs an update
+					break;
 				}
-				// else: needs an update
-				break;
-            }			
+			}
+			$result->free();
 		}
 		try {
 			$json = $this->saveFresh($url,($rowcount!=1));
@@ -97,14 +100,17 @@ class JsonConnector {
 		$datenow = date('c');
 		$ttl = $this->calcTTL($url);
 		if($isNew){
-			$sql = "INSERT INTO jsoncache (url, date_saved, time_to_live, json) VALUES ('".$url."','".$datenow."',".$ttl.", '".$json."')";
+			$sql = "INSERT INTO jsoncache (url, date_saved, time_to_live, json) VALUES ('".$url."','".$datenow."',".$ttl.", '".$json."');";
 		} else {
 			$sql = "UPDATE jsoncache SET date_saved = '".$datenow."', time_to_live='".$ttl."', json='".$json."' WHERE url = '".$url."';";
 		}
 		
-		if (!mysqli_query($this->conn,$sql)){
+		$result = $this->conn->real_query($sql);
+		if (!$result){
 			throw new Exception('Insert/Update failed -- Error: ' . mysqli_error($this->conn));
+			$result->free();
 		}
+		
 		return stripslashes($json);
 	}
 	
@@ -134,6 +140,42 @@ class JsonConnector {
 			return $this->ttl_character;
 		}
 		return $this->ttl_generic;
+	}
+	
+	/**
+	 * Automated SQL updater
+	 */
+	private function update(){
+		$dbVer = "0.0.0";
+		
+		if($result = $this->conn->query("SELECT * FROM settings WHERE key_name='db_version';")){
+			$rowcount = $result->num_rows;
+			if($rowcount==1){
+				 while ($row = $result->fetch_assoc()) {
+					$dbVer = $row['key_value'];
+					break;
+				}
+			}
+			$result->free();
+		}
+		
+		foreach(glob('./Database/updates/*.sql') as $filename){
+			$fileVer = substr(basename($filename),0,-4);
+			if(version_compare($dbVer,$fileVer,'<')){
+				$query = file_get_contents($filename);
+
+				if($this->conn->multi_query($query)) {
+					do {
+						if($result = $this->conn->store_result()) $result->free();
+						if(!$this->conn->more_results()) break;
+						if(!$this->conn->next_result()) {
+							throw new Exception('Failed to upgrade the Database with '.$fileVer.'.sql : ' . mysqli_error($this->conn));
+							break;
+						}
+					} while (true);
+				}
+			}
+		}
 	}
 }	
 ?>
