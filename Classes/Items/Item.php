@@ -1,6 +1,5 @@
 <?php
 //include_once 'Util.php';
-
 abstract class Item {
     //item quality
     const POOR=0,COMMON=1,UNCOMMON=2,RARE=3,EPIC=4,LEGENDARY=5,ARTIFACT=6,HEIRLOOM=7;
@@ -36,6 +35,10 @@ abstract class Item {
         $tooltip = 'lvl=' + $level;
         return $tooltip;
     }
+	public function buildWowHeadToolTipTransmog($level=90){
+		return;
+	}
+	
     public function getItemId(){
         return $this->itemid;
     }
@@ -70,5 +73,9 @@ abstract class Item {
        
         return intval( $DisplayId );
     }
+}
+
+interface Transmogable {
+	public function getTransmogItem();
 }
 ?>

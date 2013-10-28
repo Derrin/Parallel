@@ -1,5 +1,4 @@
 <?php
-
 class GearItem extends Item{
     private $upgrade;
     private $maxupgrade;
@@ -8,6 +7,7 @@ class GearItem extends Item{
     private $set = array();
     //suffix for random items!
     private $suffix;
+	private $enchant;
 	
 	private $transmogable = false; //TODO - DDD: need to add support for this across child classes.
     
@@ -49,9 +49,37 @@ class GearItem extends Item{
         return $tooltip;
     }
 	
-	public function isTransmogable(){
-		return $this->transmogable;
+	
+	
+	public function buildWowHeadToolTipTransmog($level=90){
+		if($tmItem = $this->getTransmogItem()){
+			$itemURL = "http://eu.battle.net/api/wow/item/" . $tmItem;
+			try{
+				$jsonConnector = new JsonConnector();
+				$json = $jsonConnector->request($itemURL);
+				$rawItem = json_decode($json);
+				$itemObj = new GearItem(
+					$rawItem->id,
+					$rawItem->name,
+					$rawItem->icon,
+					$rawItem->quality,
+					$rawItem->itemLevel,
+					null,
+					null,
+					null,
+					null,
+					null,
+					null,
+					null
+				);
+				//var_dump($itemObj);die;
+				return $itemObj->buildWowHeadToolTip($level);
+			} catch(Exception $ex){}
+		}
+		return;
+		
 	}
+	
 }
 
 ?>
