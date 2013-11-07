@@ -7,7 +7,6 @@ class SpecBuilder {
     public function buildSpecs($json){
         $specs[0] = $this->buildSpec($json[0]);
         $specs[1] = $this->buildSpec($json[1]);
-        
         return $specs;
     }
     private function buildSpec($json){
@@ -15,9 +14,9 @@ class SpecBuilder {
         if(isset($json->spec->name)){
             $selected = (isset($json->selected) && $json->selected== true);
             $spec = new Spec($json->spec->name,
-                    $json->spec->role,
-                    $json->spec->icon,
-                    $selected);
+                             $json->spec->role,
+                             $json->spec->icon,
+                             $selected);
         }
         else $spec = new Spec();
         
@@ -65,5 +64,4 @@ class SpecBuilder {
         return $glyphs;
     }
 }
-
 ?>

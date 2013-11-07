@@ -103,7 +103,8 @@ class ItemBuilder {
             //item doesn't exist yet
                 $json = @file_get_contents("http://eu.battle.net/api/wow/item/". $itemid);
                 if ($json === false) {
-                    echo '<h1>Item not found, good day sir!</h1>';
+                    //WHAT THE FUCK TO DO IF ITEM NOT FOUND BIG TODOOOOOOOOO
+                    echo '<h1>Item'.$itemid. 'not found, good day sir!</h1>';
                     // to logfile character that couldn't be found!
                     // server may be down too!
                 } else {

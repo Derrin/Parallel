@@ -77,7 +77,7 @@ class GearItem{
             $tooltip .= 'lvl=' + $level; 
             $tooltip .= '" target="_blank">';
             $tooltip .= '<img src="'.$item->getIconLink().'">';
-            $tooltip .= $this->getItemName();
+            $tooltip .= $item->getName();
             $tooltip .= '</a>';
             return $tooltip;
         }
