@@ -20,7 +20,10 @@ class ArmouryItem {
         $this->quality = $quality;
         $this->itemlevel = $itemlevel;
         $this->armourtype = $armourtype;
-        if($slot == 26) $slot=15;
+        //gives a righthanded bow the slot of a twohander so it displays on the wowheadviewer
+        if($slot == 26) $slot=17;
+        //gives shields the slot of an offhand so it displays on the wowheadviewer
+        if($slot == 14) $slot=13;
         $this->slot = $slot;
         $this->sockets = $sockets;
         $this->socketbonus = $socketbonus;
@@ -36,6 +39,9 @@ class ArmouryItem {
     }
     public function getIcon(){
         return $this->icon;
+    }
+    public function getIconLink(){
+        return Util::getIcon36($this->icon);
     }
     public function getQuality(){
         return $this->quality;

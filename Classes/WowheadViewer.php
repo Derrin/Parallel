@@ -18,6 +18,7 @@ class WowheadViewer {
         $html .= $this->getAppearance();
         $html .='&mode=3&modelType=16&contentPath=http://wow.zamimg.com/modelviewer/';
         $html .=$this->getGear();
+        var_dump($this->getGear());
         $html .='">';
         $html .='</object>';
         return $html;
@@ -47,10 +48,10 @@ class WowheadViewer {
         if($this->character->getAppearance()->IsHelmShown()){
             $gear[]= $this->getItemLook($items['head']);
         }
-        $gear[]=$this->getItemLook($items['shoulder']);
         if($this->character->getAppearance()->IsCloakShown()){
             $gear[]=$this->getItemLook($items['back']);
         }
+        $gear[]=$this->getItemLook($items['shoulder']);
         $gear[]=$this->getItemLook($items['chest']);
         $gear[]=$this->getItemLook($items['shirt']);
         $gear[]=$this->getItemLook($items['tabard']);
@@ -69,7 +70,7 @@ class WowheadViewer {
                 return $item->getSlot().','.$item->getDisplayId();
             }
             else{
-                return $item->getSlot().','.$item->getTransmog()->getDisplayId();
+                return $item->getTransmog()->getSlot().','.$item->getTransmog()->getDisplayId();
             }
         }
         else return '';

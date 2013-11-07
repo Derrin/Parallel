@@ -117,7 +117,10 @@ class ItemBuilder {
                             foreach($result->socketInfo->sockets as $value){
                                 $sockets[] = $value->type;
                             }
-                            $socketbonus = $result->socketInfo->socketBonus;
+                            if(isset($result->socketInfo->socketBonus))
+                                $socketbonus = $result->socketInfo->socketBonus;
+                            else
+                                $socketbonus="";
                         }
                         else{
                             $sockets = array();
@@ -145,7 +148,7 @@ class ItemBuilder {
                         else{
 //                            echo "inserted object!";
 //                            echo "<h1>Item:</h1>";
-                            var_dump($item);
+                            //var_dump($item);
                         }
                     }
                 }

@@ -21,6 +21,69 @@ class GearItem{
         $this->itemid = $id;
     }
     
+    public function buildWowHeadToolTip($level=90){
+        //$level -> character itemlevel for hairlooms
+        $tooltip  = '<a href="http://www.wowhead.com/item=';
+        $tooltip .= $this->itemid.'"';
+        $tooltip .= 'class="q'.$this->getQuality().'"';
+        $tooltip .= 'rel="';
+        
+        $tooltip .= $this->buildParamsTooltipHook($level);
+        
+        $tooltip .= '" target="_blank">';
+        $tooltip .= '<img src="'.$this->getIconLink().'">';
+        $tooltip .= $this->getItemName();
+        $tooltip .= '</a>';
+        return $tooltip;
+    }
+    protected function buildParamsTooltipHook($level){
+        //TODO check for null values;
+        $tooltip = 'lvl=' + $level;
+        if($this->upgrade){
+            $tooltip .= '&upgd='.$this->upgrade;
+	}
+	if($this->gems){
+            $gemStr = '';
+            foreach($this->gems as $gem) {
+                $gemStr .= $gem.':';
+            }
+            $tooltip .= '&gems=' . trim($gemStr,':');
+	}
+        if($this->set){
+            $pcsStr = '';
+            foreach($this->set as $setPiece) {
+                $pcsStr .= $setPiece.':';
+            }
+            $tooltip .= '&pcs=' . trim($pcsStr,':');
+	}
+        if($this->reforge){
+            $tooltip .='&forg='.$this->reforge;
+	}
+        if($this->suffix){
+            $tooltip .='&rand='.$this->suffix;
+        }
+        if($this->enchant){
+            $tooltip .='&ench='.$this->enchant;
+        }
+        return $tooltip;
+    }
+    public function buildWowHeadToolTipTransmog($level=90){
+        $item = $this->getTransmog();
+        if(!is_null($item)){
+            $tooltip  = '<a href="http://www.wowhead.com/item=';
+            $tooltip .= $item->getId().'"';
+            $tooltip .= 'class="q'.$item->getQuality().'"';
+            $tooltip .= 'rel="';
+            $tooltip .= 'lvl=' + $level; 
+            $tooltip .= '" target="_blank">';
+            $tooltip .= '<img src="'.$item->getIconLink().'">';
+            $tooltip .= $this->getItemName();
+            $tooltip .= '</a>';
+            return $tooltip;
+        }
+        return '';
+    }
+        
 //ArmouryItem Interface
     public function getArmouryItem(){
         if(is_null($this->armouryitem)){
@@ -37,7 +100,7 @@ class GearItem{
         return $this->getArmouryItem()->getName();
     }
     public function getIconLink(){
-        return Util::getIcon36($this->getArmouryItem()->getIcon());
+        return $this->getArmouryItem()->getIconLink();
     }
     public function getQuality(){
         return $this->getArmouryItem()->getQuality();
@@ -129,76 +192,5 @@ class GearItem{
     public function setWeaponInfo($weap){
         $this->weaponinfo = $weap;
     }
-    
-    
-    public function buildWowHeadToolTip($level=90){
-        //$level -> character itemlevel for hairlooms
-        $tooltip  = '<a href="http://www.wowhead.com/item=';
-        $tooltip .= $this->itemid.'"';
-        $tooltip .= 'class="q'.$this->getQuality().'"';
-        $tooltip .= 'rel="';
-        $tooltip .= $this->buildParamsTooltipHook($level);
-        $tooltip .= '" target="_blank">';
-        $tooltip .= '<img src="'.$this->getIconLink().'">';
-        $tooltip .= $this->getItemName();
-        $tooltip .= '</a>';
-        return $tooltip;
-    }
-    protected function buildParamsTooltipHook($level){
-        //TODO check for null values;
-        $tooltip = 'lvl=' + $level;
-        if($this->upgrade){
-			$tooltip .= '&upgd='.$this->upgrade;
-		}
-		if($this->gems){
-			$gemStr = '';
-			foreach($this->gems as $gem) $gemStr .= $gem.':';
-			$tooltip .= '&gems=' . trim($gemStr,':');
-		}
-        if($this->set){
-			$pcsStr = '';
-			foreach($this->set as $setPiece) $pcsStr .= $setPiece.':';
-			$tooltip .= '&pcs=' . trim($pcsStr,':');
-		}
-        if($this->reforge){
-			$tooltip .='&forg='.$this->reforge;
-		}
-		if($this->suffix){
-			$tooltip .='&rand='.$this->suffix;
-		}
-		if($this->enchant){
-			$tooltip .='&ench='.$this->enchant;
-		}
-        return $tooltip;
-    }
-	public function buildWowHeadToolTipTransmog($level=90){
-            //TODO REWRITE
-		if($tmItem = $this->transmogLL){
-			$itemURL = "http://eu.battle.net/api/wow/item/" . $tmItem;
-			try{
-				$jsonConnector = new JsonConnector();
-				$json = $jsonConnector->request($itemURL);
-				$rawItem = json_decode($json);
-				$itemObj = new GearItem(
-					$rawItem->id,
-					$rawItem->name,
-					$rawItem->icon,
-					$rawItem->quality,
-					$rawItem->itemLevel,
-					null,
-					null,
-					null,
-					null,
-					null,
-					null,
-					null
-				);
-				//var_dump($itemObj);die;
-				return $itemObj->buildWowHeadToolTip($level);
-			} catch(Exception $ex){}
-		}
-		return;
-	}
 }
-
 ?>
