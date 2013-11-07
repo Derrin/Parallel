@@ -45,7 +45,8 @@
                                             $result->icon, 
                                             $result->quality, 
                                             $result->itemLevel, 
-                                            $result->itemSubClass, 
+                                            $result->itemSubClass,
+                                            $result->inventoryType,
                                             $sockets, 
                                             $socketbonus);
                     //insert
@@ -79,4 +80,5 @@
         }
          mysqli_close($con);
     }
+    echo $item->getSlotName();
 ?>

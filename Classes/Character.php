@@ -2,7 +2,7 @@
 
 class Character {
     // 24->neutral panda, 25 -> alliance, 26 -> horde
-    public static $RACE = array(1 => "Human",2 => "Orc",3 => "Dwarve",
+    public static $RACE = array(1 => "Human",2 => "Orc",3 => "Dwarf",
         4 => "Night Elf",5 => "Undead",6 => "Tauren",7 => "Gnome",
         8 => "Troll",9 => "Goblin",10=> "Blood Elf",11=> "Draenei",
         22=> "Worgen",24=> "Pandaren",25=> "Pandaren",26=> "Pandaren");
@@ -31,9 +31,8 @@ class Character {
     private $averageIlvl;
     private $averageIlvlEquipped;
     private $progression = array();
+    private $appearance;
     
-    //variable voor steeds weer te berekenen? databaseperformantie???
-    // protected needsToBeInspecter; ????
     function __construct($name,$title,$class,$race,$gender,$level,$averageIlvl,$averageIlvlEquipped,$achievementPoints,$totalHonorableKills,$thumbnail,$guild,$realm,$lastUpdate){
         $this->name = $name;
         $this->title = $title;
@@ -51,40 +50,6 @@ class Character {
         $this->lastupdate = $lastUpdate;
     }
 
-    public function checkIfAllArmourType()
-    {
-        ;
-    }
-    public function hitCap()
-    {
-        //if tank 7.5%
-        //if melee dps / hunter 7.5%
-        //if caster 15%
-        //
-    }
-    public function expCap()
-    {
-        //if tank 15%
-        //if melee dps / hunter 7.5%
-        //ignore healers & spellcasters
-    }
-    public function checkProfession(){
-        
-    }
-    public function missingEnchants(){
-        //loop over items
-        //check of enchants juist zijn voor profession
-    }
-    public function missingGems(){
-        // no automatic check for gems
-    }
-    public function missingProfessionItems(){
-        //jewelcrafting gems
-    }
-    public function itemsNotUpgraded()
-    {
-        
-    }
     //Get methods
     public function getLastUpdate() {
         return $this->lastupdate;
@@ -155,6 +120,12 @@ class Character {
     }
     public function getAverageIlvlEquipped(){
         return $this->averageIlvlEquipped;
+    }
+    public function getAppearance(){
+        return $this->appearance;
+    }
+    public function setAppearance($appearance){
+        $this->appearance = $appearance;
     }
     public function getThumbnailLink($type=""){
         $output='http://eu.battle.net/static-render/eu/'.$this->thumbnail;

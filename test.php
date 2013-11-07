@@ -16,7 +16,8 @@
     //echo '<a href="http://www.wowhead.com/item=94820" class="q4" rel="rand=-339">abc</a>';
     error_reporting(E_ALL);
     include_once('Classes\CharacterBuilder.php');
-	include_once('Classes\JsonConnector.php');
+    include_once('Classes\JsonConnector.php');
+    include_once('Classes\WowheadViewer.php');
 
     //ini_set('max_execution_time', 300);
     //http://eu.battle.net/api/wow/character/Silvermoon/Derrin?fields=items,feed,stats,talents,professions,titles,progression
@@ -31,8 +32,8 @@
     $server = "Silvermoon";
 
     //guild parameter only for pugs and recruits, not for guildaudits
-	$characterURL = "http://" . $region . ".battle.net/api/wow/character/" . $server . "/" . $char . "?fields=talents,stats,guild,items,progression,professions,titles";
-	try {
+	$characterURL = "http://" . $region . ".battle.net/api/wow/character/" . $server . "/" . $char . "?fields=talents,stats,guild,items,progression,professions,titles,appearance";
+//	try {
 		$jsonConn = new JsonConnector();
 		$json = $jsonConn->request($characterURL);
 	
@@ -100,19 +101,23 @@
             echo '<tr><td><b>Shirt</b></td><td>'.$items['shirt']->buildWowHeadToolTip().'</td><td>&nbsp;</td></tr>';
             echo '<tr><td><b>Tabard</b></td><td>'.$items['tabard']->buildWowHeadToolTip().'</td><td>&nbsp;</td></tr>';
             echo '</table>';
-            
+            echo '<br><br><br><br><br><br><br><br><br>';
             echo '<h1>3D view</h1>';
             echo '<p>';
-            echo '<object id="dsjkgbdsg2346" width="560" height="400" type="application/x-shockwave-flash" data="http://wow.zamimg.com/modelviewer/ZAMviewerfp11.swf" style="visibility: visible;">';
-            echo '<param name="quality" value="high">';
-            echo '<param name="allowscriptaccess" value="always">';
-            echo '<param name="allowfullscreen" value="false">';
-            echo '<param name="menu" value="false">';
-            echo '<param name="bgcolor" value="#999999">';
-            echo '<param name="wmode" value="direct">';
-            echo '<param name="flashvars" value="model=humanmale&skins=6&modelType=16&contentPath=http://wow.zamimg.com/modelviewer/&equipList=3,112767,5,112579,10,112580,7,112581">';
-            echo '</object></p>';
-
+            $viewer = new WowheadViewer($character);
+            echo $viewer->buildViewer();
+            echo '</p>';
+            
+            echo '<h1>Appearance</h1>';
+            echo '<p>';
+            echo 'faceVariation:' . $character->getAppearance()->getFaceVariation();
+            echo '<br>Skincolor:' . $character->getAppearance()->getSkinColor();
+            echo '<br>HairVariation:' . $character->getAppearance()->getHairVariation();
+            echo '<br>Haircolor:' . $character->getAppearance()->getHairColor();
+            echo '<br>FeatureVariation:' . $character->getAppearance()->getFeatureVariation();
+            echo '<br>Showhelm:' . $character->getAppearance()->IsHelmShown();
+            echo '<br>Showcloak:' . $character->getAppearance()->IsCloakShown();
+            echo '</p>';
             //Talents
             echo '<h1>Spec</h1>';
             echo '<table border="1">';
@@ -212,9 +217,9 @@
             var_dump($results->items);
             var_dump($results);
         }
-    } catch(Exception $ex){
-		echo "<span style='color:red;'>" . $ex->getMessage() . "</span>";
-	}
+//    } catch(Exception $ex){
+//		echo "<span style='color:red;'>" . $ex->getMessage() . "</span>";
+//	}
 ?>
     </body>
 </html>
